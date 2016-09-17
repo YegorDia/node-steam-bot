@@ -1,0 +1,25 @@
+{
+  "trade_offers": {
+    "cancel_time_seconds": 3600,
+    "pending_cancel_time_seconds": 1800,
+    "cancel_outdated_count": 30,
+    "cancel_if_threshold_seconds": 604800,
+    "check_interval_seconds": 5,
+    "confirmations_retry_timeout_seconds": 5
+  },
+
+  "test": {
+    "bot_credentials": {
+      "username": "",
+      "password": "",
+      "shared_secret": "",
+      "identity_secret": ""
+    },
+    "trading_details": {
+      "steamID": "",
+      "trade_token": ""
+    },
+    "appid": 730,
+    "contextid": 2
+  }
+}

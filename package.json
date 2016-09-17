@@ -1,0 +1,31 @@
+{
+  "name": "node-steam-bot",
+  "version": "1.0.0",
+  "description": "Steam Bot",
+  "main": "index.js",
+  "keywords": [
+    "steam",
+    "bot",
+    "authenticator",
+    "confirmation",
+    "trade",
+    "tradeoffer"
+  ],
+  "author": "YegorDia",
+  "engines": {
+    "node": ">= 4.2.0"
+  },
+  "scripts": {
+    "test": "mocha tests/*.js"
+  },
+  "dependencies": {
+    "chai": "^3.5.0",
+    "config": "^1.16.0",
+    "mocha": "^3.0.2",
+    "steam-id-convertor": "^1.0.1",
+    "steam-totp": "~1.4.0",
+    "steam-tradeoffer-manager": "^2.2.3",
+    "steam-user": "^3.13.1",
+    "steamcommunity": "^3.26.1"
+  }
+}
