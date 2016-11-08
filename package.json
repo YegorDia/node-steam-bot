@@ -1,6 +1,6 @@
 {
   "name": "node-steam-bot",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Steam Bot",
   "main": "index.js",
   "keywords": [
