@@ -20,6 +20,7 @@ function SteamBot(logInData) {
     this.cookies = null;
     this.sessionID = null;
     this.inventories = null;
+    this.processingOffers = true;
 
     this.steamUser = new SteamUser();
     this.steamCommunity = new SteamCommunity();
@@ -88,6 +89,26 @@ function SteamBot(logInData) {
         self.emit('loggedIn');
     });
 
+    self.steamCommunity.on('sessionExpired', function(err) {
+        self.logOff(function () {
+            self.logIn();
+        });
+    });
+
+    self.processingInterval = setInterval(function() {
+        if (self.processingOffers === true) {
+            self.processingOffers = false;
+        }
+    }, (50 * 1000));
+
+    self.relogInterval = setInterval(function() {
+        if (self.processingOffers === false) {
+            self.logOut(function() {
+                self.logIn();
+            });
+        }
+    }, (60 * 60 * 1000));
+
     self.steamUser.on('error', function (e) {
         console.log(e);
         switch (e.eresult) {
@@ -127,14 +148,20 @@ SteamBot.prototype.logIn = function () {
     });
 };
 
-SteamBot.prototype.logOut = function () {
+SteamBot.prototype.logOut = function (callback) {
     var self = this;
     console.log('Logging Out');
     self.steamUser.logOff();
+    setTimeout(function() {
+        if (callback) {
+            callback();
+        }
+    }, 5000);
 };
 
 SteamBot.prototype.sendTradeOffer = function (recipientSteamID64, tradeToken, itemsToReceive, itemsToSend, message, autoConfirm, callback) {
     var self = this;
+    self.processingOffers = true;
 
     //var recipientSteamID32 = SteamIdConventor.to32(recipientSteamID64).toString();
     var newOffer = self.steamTrade.createOffer(recipientSteamID64, tradeToken);
@@ -209,6 +236,7 @@ SteamBot.prototype.sendTradeOffer = function (recipientSteamID64, tradeToken, it
         }
 
         if (callback) {
+            self.processingOffers = false;
             callback(err, status);
         }
     });
@@ -218,6 +246,7 @@ SteamBot.prototype.sendTradeOffer = function (recipientSteamID64, tradeToken, it
 
 SteamBot.prototype.generateConfirmationCode = function (time, tag) {
     var self = this;
+    self.processingOffers = true;
     if (self.identitySecret) {
         return SteamTotp.generateConfirmationKey(self.identitySecret, time, tag);
     } else {
@@ -227,11 +256,16 @@ SteamBot.prototype.generateConfirmationCode = function (time, tag) {
 
 SteamBot.prototype.getConfirmations = function (time, key, confirmationsCallback) {
     var self = this;
-    self.steamCommunity.getConfirmations(time, key, confirmationsCallback);
+    self.processingOffers = true;
+    self.steamCommunity.getConfirmations(time, key, function() {
+        self.processingOffers = false;
+        confirmationsCallback();
+    });
 };
 
 SteamBot.prototype.confirmAllUnacceptedTrades = function () {
     var self = this;
+    self.processingOffers = true;
     var time = SteamTotp.time();
 
     self.getConfirmations(time, self.generateConfirmationCode(time, "conf"), function (err, confirmations) {
@@ -251,31 +285,38 @@ SteamBot.prototype.confirmAllUnacceptedTrades = function () {
                 }
             }
         }
+        self.processingOffers = false;
     });
 };
 
 SteamBot.prototype.getInventory = function (appid, contextid, tradableOnly, inventoryCallback) {
     var self = this;
+    self.processingOffers = true;
     self.steamTrade.loadInventory(appid, contextid, tradableOnly, inventoryCallback);
 };
 
 SteamBot.prototype.getInventoryBySteamID = function (steamID, appid, contextid, tradableOnly, inventoryCallback) {
     var self = this;
+    self.processingOffers = true;
     self.steamTrade.loadUserInventory(steamID, appid, contextid, tradableOnly, inventoryCallback);
 };
 
 SteamBot.prototype.getTradeOffer = function (tradeofferId, callback) {
     var self = this;
+    self.processingOffers = true;
     self.steamTrade.getOffer(tradeofferId, function (err, offer) {
         if (!err) {
             callback(null, offer);
+            self.processingOffers = false;
         } else {
             callback(err, offer);
+            self.processingOffers = false;
         }
     });
 };
 
 SteamBot.prototype.cancelTradeOffer = SteamBot.prototype.declineTradeOffer = function (tradeOffer, callback) {
+    self.processingOffers = true;
     tradeOffer.cancel(callback);
 };
 
