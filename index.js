@@ -88,7 +88,7 @@ function SteamBot(logInData) {
         console.log('Logged In with WebSession');
         self.emit('loggedIn');
 
-        self.steamCommunity.startConfirmationChecker(30000, "identitySecret");
+        self.steamCommunity.startConfirmationChecker(30000, self.identitySecret);
     });
 
     self.steamCommunity.on('sessionExpired', function(err) {
