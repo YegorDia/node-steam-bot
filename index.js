@@ -87,9 +87,12 @@ function SteamBot(logInData) {
 
         console.log('Logged In with WebSession');
         self.emit('loggedIn');
+
+        self.steamCommunity.startConfirmationChecker(30000, "identitySecret");
     });
 
     self.steamCommunity.on('sessionExpired', function(err) {
+        self.steamCommunity.stopConfirmationChecker();
         self.logOff(function () {
             self.logIn();
         });
@@ -103,6 +106,7 @@ function SteamBot(logInData) {
 
     self.relogInterval = setInterval(function() {
         if (self.processingOffers === false) {
+            self.steamCommunity.stopConfirmationChecker();
             self.logOut(function() {
                 self.logIn();
             });
