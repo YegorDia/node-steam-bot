@@ -232,7 +232,10 @@ SteamBot.prototype.sendTradeOffer = function (recipientSteamID64, tradeToken, it
             self.emit('tradeofferSent', status);
 
             if (confirmAfter === true) {
-                self.confirmAllUnacceptedTrades();
+                setTimeout(function() {
+                    self.steamCommunity.checkConfirmations();
+                    //self.confirmAllUnacceptedTrades();
+                }, 500);
             }
         } else {
             console.log('\tSending trade offer error: ' + err);
