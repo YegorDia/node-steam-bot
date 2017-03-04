@@ -308,15 +308,32 @@ SteamBot.prototype.getInventoryBySteamID = function (steamID, appid, contextid, 
     self.steamTrade.loadUserInventory(steamID, appid, contextid, tradableOnly, inventoryCallback);
 };
 
-SteamBot.prototype.getTradeOffer = function (tradeofferId, callback) {
+SteamBot.prototype.getTradeOffer = function (tradeofferId, includeReceived, callback) {
     var self = this;
     self.processingOffers = true;
     self.steamTrade.getOffer(tradeofferId, function (err, offer) {
         if (!err) {
-            callback(null, offer);
-            self.processingOffers = false;
+            if (typeof includeReceived === 'function') {
+                callback = includeReceived;
+            }
+            
+            if (includeReceived === true) {
+                offer.getReceivedItems(function (err, items) {
+                    if (!err) {
+                        offer.receivedItems = items;
+                        callback(null, offer);
+                        self.processingOffers = false;
+                    } else {
+                        callback(err);
+                        self.processingOffers = false;
+                    }
+                });
+            } else {
+                callback(null, offer);
+                self.processingOffers = false;
+            }
         } else {
-            callback(err, offer);
+            callback(err);
             self.processingOffers = false;
         }
     });
