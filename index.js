@@ -316,7 +316,7 @@ SteamBot.prototype.getTradeOffer = function (tradeofferId, includeReceived, call
             if (typeof includeReceived === 'function') {
                 callback = includeReceived;
             }
-            
+
             if (includeReceived === true) {
                 offer.getReceivedItems(function (err, items) {
                     if (!err) {
@@ -324,7 +324,7 @@ SteamBot.prototype.getTradeOffer = function (tradeofferId, includeReceived, call
                         callback(null, offer);
                         self.processingOffers = false;
                     } else {
-                        callback(err);
+                        callback(null, offer);
                         self.processingOffers = false;
                     }
                 });
