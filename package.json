@@ -1,6 +1,6 @@
 {
   "name": "node-steam-bot",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Steam Bot",
   "main": "index.js",
   "keywords": [
@@ -23,11 +23,13 @@
     "chai": "^3.5.0",
     "config": "^1.16.0",
     "mocha": "^3.0.2",
+    "request": "^2.81.0",
+    "steam-client": "^2.3.0-beta1",
     "steam-id-convertor": "^1.0.1",
     "steam-totp": "~1.4.0",
-    "steam-tradeoffer-manager": "^2.2.3",
-    "steam-user": "^3.13.1",
-    "steamcommunity": "^3.26.1"
+    "steam-tradeoffer-manager": "^2.7.1",
+    "steam-user": "^3.19.1",
+    "steamcommunity": "^3.30.1"
   },
   "license": "GNU"
 }

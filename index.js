@@ -1,9 +1,11 @@
 var config = require('config');
+var SteamClient = require('steam-client');
 var SteamUser = require('steam-user');
 var SteamCommunity = require('steamcommunity');
 var TradeOfferManager = require('steam-tradeoffer-manager');
 var SteamTotp = require('steam-totp');
 //var SteamIdConventor = require('steam-id-convertor');
+var httpRequest = require('request');
 
 // Object constructor
 function SteamBot(logInData) {
@@ -22,8 +24,25 @@ function SteamBot(logInData) {
     this.inventories = null;
     this.processingOffers = true;
 
-    this.steamUser = new SteamUser();
-    this.steamCommunity = new SteamCommunity();
+    this.steamClient = new SteamClient.CMClient();
+
+    if (logInData.proxy) {
+        // Not sure if its working tb tested with proper proxy
+        //this.steamClient.setHttpProxy(logInData.proxy);
+        this.steamUser = new SteamUser(self.steamClient);
+
+        var proxifiedRequest = httpRequest.defaults({
+            proxy: logInData.proxy,
+            forever: true
+        });
+        this.steamCommunity = new SteamCommunity({
+            request: proxifiedRequest
+        });
+    } else {
+        this.steamUser = new SteamUser(this.steamClient);
+        this.steamCommunity = new SteamCommunity();
+    }
+
     this.steamTrade = new TradeOfferManager({
         steam: self.steamUser,
         community: self.steamCommunity,
@@ -34,6 +53,10 @@ function SteamBot(logInData) {
         language: 'en',
         pollInterval: config.get('trade_offers.check_interval_seconds') * 1000
     });
+
+    this.steamClient.on('error', function (err, data) { /*console.log('client-error', err, data);*/ });
+    this.steamClient.on('debug', function (err, data) { /*console.log('client-debug', err, data);*/ });
+    this.steamUser.on('error', function (err, data) { /*console.log('user-error', err, data);*/ });
 
     if (logInData != undefined && logInData != null && 'username' in logInData && 'password' in logInData) {
         this.username = logInData.username;
@@ -340,6 +363,7 @@ SteamBot.prototype.getTradeOffer = function (tradeofferId, includeReceived, call
 };
 
 SteamBot.prototype.cancelTradeOffer = SteamBot.prototype.declineTradeOffer = function (tradeOffer, callback) {
+    var self = this;
     self.processingOffers = true;
     tradeOffer.cancel(callback);
 };
